@@ -149,6 +149,13 @@ enum FILL_BUFFER_RETURN FillBuffer(unsigned char* buffer, size_t* length)
   return rc;
 }
 
+enum SEEK_RETURN Seek(int* seconds)
+{
+  debug("Seeking!");
+  ov_time_seek(&ov, (double)(*seconds));
+  return SEEK_OK;
+}
+
 enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
 {
   if (ov_fopen(filename, &ov) < 0)

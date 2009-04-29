@@ -18,6 +18,7 @@ typedef void (*init_t)(char*** Extensions);
 typedef enum GET_FILE_INFO_RETURN (*info_t)(const char* filename, FileInfo_t* fi);
 typedef enum FILL_BUFFER_RETURN (*fill_t)(unsigned char* pBuf, size_t* length);
 typedef enum OPEN_FILE_RETURN   (*open_t)(const char* filename, pa_sample_spec* ss);
+typedef enum SEEK_RETURN        (*seek_t)(int* seconds);
 typedef void (*clean_t)();
 
 typedef struct funcs
@@ -26,6 +27,7 @@ typedef struct funcs
   info_t GetFileInfo;
   fill_t FillBuffer;
   open_t OpenFile;
+  seek_t Seek;
   clean_t Cleanup;
   
   void* PluginSOHandle;
