@@ -1,6 +1,10 @@
 #include "plug-wav.h"
 
 FILE* filp = NULL;
+int g_channels     = 0;
+int g_rate         = 0;
+int g_format       = 0;
+int g_headerlength = 0;
 
 void Initialise(char*** Extensions)
 {
@@ -14,10 +18,11 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
   FILE* tempfilp = NULL;
   char* title;
   int BigEnd = BigEndianTest();
-  char chunk[4] = { '\0', '\0', '\0', '\0' };
+  unsigned char chunk[4] = { '\0', '\0', '\0', '\0' };
   int channelcount = 0;
   int samplerate = 0;
   int datalength = 0;
+  int bitspersample = 0;
   
   tempfilp = fopen(filename, "rb");
   if (!tempfilp)
@@ -27,7 +32,7 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
   
   /* Ensure this is a RIFF file */
   fread(chunk, 1, 4, tempfilp);
-  if (strncmp(chunk, "RIFF", 4))
+  if (strncmp((char*)chunk, "RIFF", 4))
     goto fail;
   
   /* Get size and ignore... */
@@ -35,12 +40,12 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
   
   /* Ensure the format is recorded as WAVE */
   fread(chunk, 1, 4, tempfilp);
-  if (strncmp(chunk, "WAVE", 4))
+  if (strncmp((char*)chunk, "WAVE", 4))
     goto fail;
   
   /* Next section should be the 'fmt ' section */
   fread(chunk, 1, 4, tempfilp);
-  if (strncmp(chunk, "fmt ", 4))
+  if (strncmp((char*)chunk, "fmt ", 4))
     goto fail;
   
   /* The length of the 'fmt ' section, should be 0x10 */
@@ -83,10 +88,22 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
   
   /* Look up the bits per sample (and block align but we ignore that) */
   fread(chunk, 1, 4, tempfilp);
+  if (BigEnd)
+  {
+    bitspersample = 0;
+    bitspersample |= chunk[2] << 8;
+    bitspersample |= chunk[3] << 0;
+  }
+  else
+  {
+    bitspersample = 0;
+    bitspersample |= chunk[2] << 0;
+    bitspersample |= chunk[3] << 8;
+  }
   
   /* Next section should be 'data' */
   fread(chunk, 1, 4, tempfilp);
-  if (strncmp(chunk, "data", 4))
+  if (strncmp((char*)chunk, "data", 4))
     goto fail;
   
   /* Fetch the data length */
@@ -136,7 +153,7 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
   fi->Track = 0;
   fi->Seekable = 1;
   
-  fi->Length = ((datalength / channelcount) / samplerate);
+  fi->Length = ((datalength / channelcount) / samplerate) / (bitspersample / 8);
   
   /* Rest of the file is data! woo! */
   return GET_FILE_INFO_OK;
@@ -166,9 +183,29 @@ enum FILL_BUFFER_RETURN FillBuffer(unsigned char* pBuf, size_t* length)
   return rc;
 }
 
+enum SEEK_RETURN Seek(int* seconds)
+{
+  size_t SeekPoint = 0;
+  
+  SeekPoint =  (*seconds) * g_rate;
+  SeekPoint *= g_channels;
+  SeekPoint *= g_format / 0x8;
+  SeekPoint += g_headerlength;
+  
+  fseek(filp, SeekPoint, SEEK_SET);
+  if (feof(filp))
+  {
+    return SEEK_EOFF;
+  }
+  else
+  {
+    return SEEK_OK;
+  }
+}
+
 enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
 {
-  char chunk[4];
+  unsigned char chunk[4];
   int BigEnd = BigEndianTest();
   
   filp = fopen(filename, "rb");
@@ -177,7 +214,7 @@ enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
   
   /* Ensure this is a RIFF file */
   fread(chunk, 1, 4, filp);
-  if (strncmp(chunk, "RIFF", 4))
+  if (strncmp((char*)chunk, "RIFF", 4))
     goto fail;
   
   /* Get size and ignore... */
@@ -185,12 +222,12 @@ enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
   
   /* Ensure the format is recorded as WAVE */
   fread(chunk, 1, 4, filp);
-  if (strncmp(chunk, "WAVE", 4))
+  if (strncmp((char*)chunk, "WAVE", 4))
     goto fail;
   
   /* Next section should be the 'fmt ' section */
   fread(chunk, 1, 4, filp);
-  if (strncmp(chunk, "fmt ", 4))
+  if (strncmp((char*)chunk, "fmt ", 4))
     goto fail;
   
   /* The length of the 'fmt ' section, should be 0x10 */
@@ -207,7 +244,8 @@ enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
         && (chunk[1] == 0x00)))
     goto fail;
   
-  ss->channels = chunk[2];
+  ss->channels = (int)chunk[2];
+  g_channels   = (int)chunk[2];
   
   /* Sample rate, fun fun fun endian fun */
   fread(chunk, 1, 4, filp);
@@ -227,6 +265,7 @@ enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
     ss->rate |= chunk[1] << 8;
     ss->rate |= chunk[0] << 0;
   }
+  g_rate = ss->rate;
   
   /* Ignore the sample rate */
   fread(chunk, 1, 4, filp);
@@ -243,16 +282,18 @@ enum OPEN_FILE_RETURN OpenFile(const char* filename, pa_sample_spec* ss)
       ss->format = PA_SAMPLE_U8;
       break;
   }
+  g_format = (int)chunk[2];
   
   /* Next section should be 'data' */
   fread(chunk, 1, 4, filp);
-  if (strncmp(chunk, "data", 4))
+  if (strncmp((char*)chunk, "data", 4))
     goto fail;
   
   /* Ignore the data length */
   fread(chunk, 1, 4, filp);
   
   /* Rest of the file is data! woo! */
+  g_headerlength = ftell(filp);
   return OPEN_FILE_OK;
   
 fail:
@@ -267,6 +308,11 @@ void Cleanup()
     fclose(filp);
     filp = NULL;
   }
+  
+  g_headerlength = 0;
+  g_channels     = 0;
+  g_format       = 0;
+  g_rate         = 0;
 }
 
 /* returns true if on big endian, else false */
