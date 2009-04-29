@@ -24,6 +24,13 @@ enum FILL_BUFFER_RETURN
   FILL_BUFFER_ERROR
 };
 
+enum SEEK_RETURN
+{
+  SEEK_OK,
+  SEEK_EOFF,
+  SEEK_ERROR
+};
+
 enum OPEN_FILE_RETURN
 {
   OPEN_FILE_OK,
@@ -50,12 +57,12 @@ typedef struct FileInfo
 /******************************************************************************/
 /* Plugin entry point functions:                                              */
 /******************************************************************************/
-
-void Initialise(char*** Extensions);
+void                      Initialise(char*** Extensions);
 enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi);
-enum FILL_BUFFER_RETURN FillBuffer(unsigned char* pBuf, size_t* length);
-enum OPEN_FILE_RETURN   OpenFile(const char* filename, pa_sample_spec* ss);
-void Cleanup();
+enum FILL_BUFFER_RETURN   FillBuffer(unsigned char* pBuf, size_t* length);
+enum SEEK_RETURN          Seek(int* seconds);
+enum OPEN_FILE_RETURN     OpenFile(const char* filename, pa_sample_spec* ss);
+void                      Cleanup();
 
 #ifdef __cplusplus
 }
