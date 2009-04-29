@@ -1,6 +1,6 @@
 CC = gcc
 CPP = g++
-CFLAGS = -g -pg -Wall -pedantic -DDEBUG__
+CFLAGS = -g -Wall -pedantic -DDEBUG__
 CFLAGSPLUG = -fPIC
 PLUGINS = plug-libmad.so plug-libvorbisfile.so plug-wav.so
 

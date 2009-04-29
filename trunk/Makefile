@@ -1,6 +1,6 @@
 CC = gcc
 CPP = g++
-CFLAGS = -g -pg -Wall -pedantic -DDEBUG__
+CFLAGS = -g -Wall -pedantic -DDEBUG__
 CPPFLAGS = $(CFLAGS) -O0
 OBJECTS = foobar2009.o pulsefuncs.o callbacks.o plug-loader.o MainWindow.o PlaylistBrowser.o ColumnBrowser.o SimpleControls.o
 LIBRARIES = -lpulse -lfltk
@@ -13,7 +13,7 @@ clean :
 	cd Plugins; make clean;
 
 foobar2009 : $(OBJECTS)
-	$(CC) -pg -o foobar2009 $(OBJECTS) $(LIBRARIES)
+	$(CC) -o foobar2009 $(OBJECTS) $(LIBRARIES)
 
 .c.o : $*.h
 	$(CC) $(CFLAGS) -c $<
