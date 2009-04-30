@@ -24,6 +24,7 @@ extern int			BstdFileDestroy(bstdfile_t *BstdFile);
 extern int			BstdFileEofP(const bstdfile_t *BstdFile);
 extern int			BstdFileErrorP(const bstdfile_t *BstdFile);
 extern size_t		BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstdfile_t *BstdFile);
+extern int      BstdSeek(bstdfile_t* BstdFile, size_t offset, int origin);
 
 #ifdef __cplusplus
 }

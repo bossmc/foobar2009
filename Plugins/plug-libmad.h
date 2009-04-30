@@ -24,6 +24,12 @@ enum FILL_S_BUFF_RETURN
   ERROR
 };
 
+typedef struct FrameInfo
+{
+  size_t Index;
+  struct FrameInfo* next;
+} FrameInfo_t;
+
 enum FILL_S_BUFF_RETURN FillStreamBuffer(struct mad_stream* s,
                                          unsigned char* buf,
                                          size_t* length,
