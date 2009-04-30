@@ -270,6 +270,17 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 	return(FeededSize);
 }
 
+int BstdSeek(bstdfile_t* BstdFile, size_t offset, int origin)
+{
+  BstdFile->eof = 0;
+  BstdFile->error = 0;
+  BstdFile->live = BstdFile->buffer;
+  memset(BstdFile->buffer, 0, BFILE_BUFSIZE);
+  BstdFile->live_size = 0;
+  
+  return fseek(BstdFile->fp, offset, origin);
+}
+
 /*  LocalWords:  HTAB bstdfile fread Datatypes BstdRead fp bfile BstdFile
  */
 /*
