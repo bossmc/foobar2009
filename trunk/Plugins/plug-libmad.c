@@ -12,10 +12,10 @@ unsigned char  PreBuffer[INPUT_BUFFER_SIZE + MAD_BUFFER_GUARD];
 unsigned char* ResidualProcessed = NULL;
 size_t         ResidueSize = 0;
 
-int            g_SamplesPerFrame;
-int            g_Rate;
-int            g_Channels;
-int            g_Format;
+unsigned int   g_SamplesPerFrame;
+unsigned int   g_Rate;
+unsigned int   g_Channels;
+unsigned int   g_Format;
 FrameInfo_t*   FrameLocationsHead = NULL;
 FrameInfo_t*   FrameLocationCurrent = NULL;
 
@@ -390,7 +390,7 @@ enum FILL_BUFFER_RETURN FillBuffer(unsigned char* buffer, size_t* length)
 
 enum SEEK_RETURN Seek(int* seconds)
 {
-  int TargetSample;
+  unsigned int TargetSample;
   size_t ReadSize;
   signed short TempSample;
   unsigned char* ResPtr;
@@ -664,8 +664,17 @@ enum SEEK_RETURN Seek(int* seconds)
   
   ResidueSize = MADSynth.pcm.length * (MAD_NCHANNELS(&MADFrame.header) * 2);
   ResidueSize -= TargetSample * (MAD_NCHANNELS(&MADFrame.header) * 2);
-  ResidualProcessed = (unsigned char*)malloc(ResidueSize);
-  ResPtr = ResidualProcessed;
+  
+  if (ResidueSize < (g_Rate * MAD_NCHANNELS(&MADFrame.header)) / 5)
+  {
+    ResidualProcessed = (unsigned char*)malloc((g_Rate * MAD_NCHANNELS(&MADFrame.header)) / 5);
+    ResPtr = ResidualProcessed + ((g_Rate * MAD_NCHANNELS(&MADFrame.header) / 5) - ResidueSize);
+  }
+  else
+  {
+    ResidualProcessed = (unsigned char*)malloc(ResidueSize);
+    ResPtr = ResidualProcessed;
+  }
   
   for (i = TargetSample; i < MADSynth.pcm.length; i++)
   {
@@ -681,8 +690,8 @@ enum SEEK_RETURN Seek(int* seconds)
     }
   }
   
-  /* Zero out first 16 samples (if possible) to hide burps in the sound */
-  for (i = 0; (i < MADSynth.pcm.length) && (i < 16); i++)
+  /* Zero out first 1/10 sec (if possible) to hide burps in the sound */
+  for (i = 0; (i < MADSynth.pcm.length) && (i < g_Rate / 10); i++)
   {
     ResidualProcessed[MAD_NCHANNELS(&MADFrame.header)*i] = 0;
     ResidualProcessed[MAD_NCHANNELS(&MADFrame.header)*i + 1] = 0;
