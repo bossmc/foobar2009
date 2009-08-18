@@ -1,7 +1,5 @@
 #include "callbacks.h"
 
-FILE* tempfilp;
-
 void cb_context_state(pa_context* c, void* userdata)
 {
   switch (pa_context_get_state(c))
@@ -46,7 +44,6 @@ void cb_stream_state(pa_stream* s, void* userdata)
   {
     case PA_STREAM_CREATING:
       debug("Stream state CREATING message received");
-      tempfilp = fopen("plug-libmad-output.raw", "wb");
       break;
     
     case PA_STREAM_TERMINATED:
@@ -77,7 +74,6 @@ void cb_stream_write(pa_stream* s, size_t length, void* userdata)
     switch(PACurrentFuncs->FillBuffer(data, &length))
     {
       case FILL_BUFFER_OK:
-        fwrite(data, 1, length, tempfilp);
         pa_stream_write(s,
                         data,
                         length,
@@ -87,7 +83,6 @@ void cb_stream_write(pa_stream* s, size_t length, void* userdata)
         break;
   
       case FILL_BUFFER_EOFF:
-        fwrite(data, 1, length, tempfilp);
         pa_stream_write(s,
                         data,
                         length,
@@ -114,10 +109,21 @@ void cb_stream_write(pa_stream* s, size_t length, void* userdata)
   }
 }
 
+void cb_stream_cork(pa_stream* s, int success, void* userdata)
+{
+  debug("Stream (un)corked");
+  pa_threaded_mainloop_signal(PALoop, 0);
+}
+
+void cb_stream_flush(pa_stream* s, int success, void* userdata)
+{
+  debug("Stream flushed");
+  pa_threaded_mainloop_signal(PALoop, 0);
+}
+
 void cb_stream_drain(pa_stream* s, int success, void* userdata)
 {
   debug("Stream drain message received");
-  fclose(tempfilp);
   pa_stream_disconnect(s);
   pa_threaded_mainloop_signal(PALoop, 0);
 }
