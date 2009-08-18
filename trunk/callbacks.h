@@ -16,9 +16,11 @@ extern "C" {
 void cb_context_state(pa_context* c, void* userdata);
 void cb_context_drain(pa_context* c, void* userdata);
 
-void cb_stream_state(pa_stream* c, void* userdata);
-void cb_stream_write(pa_stream* c, size_t length, void* userdata);
-void cb_stream_drain(pa_stream* c, int success, void* userdata);
+void cb_stream_state(pa_stream* s, void* userdata);
+void cb_stream_write(pa_stream* s, size_t length, void* userdata);
+void cb_stream_cork(pa_stream* s, int success, void* userdata);
+void cb_stream_flush(pa_stream* s, int success, void* userdata);
+void cb_stream_drain(pa_stream* s, int success, void* userdata);
 void cb_stream_suspended(pa_stream *s, void *userdata);
 void cb_stream_underflow(pa_stream *s, void *userdata);
 void cb_stream_overflow(pa_stream *s, void *userdata);
