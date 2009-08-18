@@ -34,6 +34,11 @@ SimpleControls::~SimpleControls()
 
 void cb_prev(Fl_Widget* o, void* userdata)
 {
+  int seconds = 53;
+
+  pa_threaded_mainloop_lock(PALoop);
+  PulseSeek(&seconds);
+  pa_threaded_mainloop_unlock(PALoop);
 }
 
 void cb_play(Fl_Widget* o, void* userdata)
@@ -57,8 +62,8 @@ void cb_next(Fl_Widget* o, void* userdata)
     PulseStop();
     
     /* Pulse state is stopped after pulse stop but stream has not terminated
-     * which leads to PulsePlayNextSong being called.  Hence if we just set state
-     * back to non-stopped then PlayNextSong will be called correctly */
+     * which leads to PulsePlayNextSong being called.  Hence if we just set
+     * state back to non-stopped then PlayNextSong will be called correctly */
     PulseState ^= PULSE_STOPPED;
   }
   else
