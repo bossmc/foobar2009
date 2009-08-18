@@ -34,11 +34,6 @@ SimpleControls::~SimpleControls()
 
 void cb_prev(Fl_Widget* o, void* userdata)
 {
-  int seconds = 53;
-
-  pa_threaded_mainloop_lock(PALoop);
-  PulseSeek(&seconds);
-  pa_threaded_mainloop_unlock(PALoop);
 }
 
 void cb_play(Fl_Widget* o, void* userdata)
