@@ -8,7 +8,7 @@ extern "C" {
 #include <pulse/pulseaudio.h>
 #include "plug-loader.h"
 
-enum PULSE_STATE
+enum PULSE_STATE_FLAGS
 {
   PULSE_PAUSED = 0x1,
   PULSE_STOPPED = 0x2

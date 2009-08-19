@@ -17,6 +17,7 @@ void PulsePlayNextSong();
 void PulsePlayPause();
 void PulseStop();
 void PulsePlay();
+void PulseSeek(int* seconds);
 
 void PulseFini();
 

@@ -98,7 +98,7 @@ void MainWindow::LoadConfig(cols_t* ColData)
 
 void cb_file_add_file(Fl_Widget* o, void* userdata)
 {
-  Fl_File_Chooser chooser(".",                      // directory
+  Fl_File_Chooser chooser("/home/andy/Music/",                     // directory
                           "Audio Files (*.{mp3,mp2,mp1,ogg,wav})", // filter
                           Fl_File_Chooser::MULTI,                  // chooser type
                           "Select Audio files to opem");           // title
