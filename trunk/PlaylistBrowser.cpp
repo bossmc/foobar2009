@@ -390,8 +390,6 @@ void PlaylistBrowser::AddFile(const char* filename)
   
   FileEntry[strlen(FileEntry)-1] = '\0';
   m_Browser->add(FileEntry, fi);
-  
-  Fl::check();
 }
 
 void PlaylistBrowser::AddDirectory(const char* path)
@@ -399,6 +397,7 @@ void PlaylistBrowser::AddDirectory(const char* path)
   DIR* dirp = NULL;
   struct dirent* direntp = NULL;
   char* NextFile = NULL;
+  int FilesAdded = 0;
   
   dirp = opendir(path);
   direntp = readdir(dirp);
@@ -414,11 +413,23 @@ void PlaylistBrowser::AddDirectory(const char* path)
           continue;
         }
         
-        NextFile = new char[strlen(path) + strlen(direntp->d_name) + 2];
-        strcpy(NextFile, path);
-        strcat(NextFile, "/");
-        strcat(NextFile, direntp->d_name);
+        if (path[strlen(path) - 1] != '/')
+        {
+          NextFile = new char[strlen(path) + strlen(direntp->d_name) + 2];
+          strcpy(NextFile, path);
+          strcat(NextFile, "/");
+          strcat(NextFile, direntp->d_name);
+        }
+        else
+        {
+          NextFile = new char[strlen(path) + strlen(direntp->d_name) + 1];
+          strcpy(NextFile, path);
+          strcat(NextFile, direntp->d_name);
+        }
+        
         AddDirectory(NextFile);
+        Fl::check();
+        
         delete[] NextFile;
         break;
         
@@ -428,6 +439,15 @@ void PlaylistBrowser::AddDirectory(const char* path)
         strcat(NextFile, "/");
         strcat(NextFile, direntp->d_name);
         AddFile(NextFile);
+        
+        /* Perform Fl::check every 20 files added (for large directories) to
+         * allow user interaction while files are loading */
+        if (++FilesAdded > 20)
+        {
+          FilesAdded = 0;
+          Fl::check();
+        }
+        
         delete[] NextFile;
         break;
       
