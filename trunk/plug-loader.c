@@ -48,6 +48,7 @@ void LoadPlugins(char* path)
         TempFunc->GetFileInfo = (info_t)dlsym(PluginSOHandle, "GetFileInfo");
         TempFunc->FillBuffer = (fill_t)dlsym(PluginSOHandle, "FillBuffer");
         TempFunc->OpenFile = (open_t)dlsym(PluginSOHandle, "OpenFile");
+        TempFunc->Seek = (seek_t)dlsym(PluginSOHandle, "Seek");
         TempFunc->Initialise = (init_t)dlsym(PluginSOHandle, "Initialise");
         TempFunc->PluginSOHandle = PluginSOHandle;
         
@@ -55,6 +56,7 @@ void LoadPlugins(char* path)
          && TempFunc->GetFileInfo
          && TempFunc->FillBuffer 
          && TempFunc->OpenFile
+         && TempFunc->Seek
          && TempFunc->Initialise)
         {
           TempFunc->Initialise(&(TempFunc->Extensions));

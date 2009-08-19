@@ -154,6 +154,28 @@ void PulsePlay()
   pa_threaded_mainloop_unlock(PALoop);
 }
 
+void PulseSeek(int* seconds)
+{
+  pa_operation* o;
+  
+  o = pa_stream_cork(PAStream, 1, cb_stream_cork, NULL);
+  while (pa_operation_get_state(o) == PA_OPERATION_RUNNING)
+    pa_threaded_mainloop_wait(PALoop);
+  pa_operation_unref(o);
+  
+  o = pa_stream_flush(PAStream, cb_stream_flush, NULL);
+  while (pa_operation_get_state(o) == PA_OPERATION_RUNNING)
+    pa_threaded_mainloop_wait(PALoop);
+  pa_operation_unref(o);
+  
+  PACurrentFuncs->Seek(seconds);
+  
+  o = pa_stream_cork(PAStream, 0, cb_stream_cork, NULL);
+  while (pa_operation_get_state(o) == PA_OPERATION_RUNNING)
+    pa_threaded_mainloop_wait(PALoop);
+  pa_operation_unref(o);
+}
+
 void PulseFini()
 {
   if (PALoop)
