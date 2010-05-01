@@ -44,10 +44,14 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
   ID3_Tag tag;
   char* field = NULL;
   char* split = NULL;
+  char filenamecopy[256];
   
-  if(!tag.Link(filename))
+  strcpy(filenamecopy, filename);
+  filenamecopy[strlen(filename) + 1] = '\0';
+
+  if(!tag.Link(filenamecopy))
   {
-    split = strrchr(filename, '/');
+    split = strrchr(filenamecopy, '/');
     if (split)
     {
       fi->Title = (char*)malloc(strlen(split));
@@ -55,8 +59,8 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
     }
     else
     {
-      fi->Title = (char*)malloc(strlen(filename) + 1);
-      strcpy(fi->Title, filename);
+      fi->Title = (char*)malloc(strlen(filenamecopy) + 1);
+      strcpy(fi->Title, filenamecopy);
     }
     
     fi->Artist = (char*)malloc(4);
@@ -162,7 +166,7 @@ enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi)
     tag.Clear();
   }
   
-  FetchMP3Header(filename);
+  FetchMP3Header(filenamecopy);
   fi->Length = GetLengthInSeconds();
   
   return GET_FILE_INFO_OK;
