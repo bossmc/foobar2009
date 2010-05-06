@@ -44,12 +44,12 @@ void LoadPlugins(char* path)
       else
       {
         TempFunc = (funcs_t*)malloc(sizeof(funcs_t));
-        TempFunc->Cleanup = (clean_t)dlsym(PluginSOHandle, "Cleanup");
-        TempFunc->GetFileInfo = (info_t)dlsym(PluginSOHandle, "GetFileInfo");
-        TempFunc->FillBuffer = (fill_t)dlsym(PluginSOHandle, "FillBuffer");
-        TempFunc->OpenFile = (open_t)dlsym(PluginSOHandle, "OpenFile");
-        TempFunc->Seek = (seek_t)dlsym(PluginSOHandle, "Seek");
-        TempFunc->Initialise = (init_t)dlsym(PluginSOHandle, "Initialise");
+        TempFunc->Cleanup = (clean_t*)dlsym(PluginSOHandle, "Cleanup");
+        TempFunc->GetFileInfo = (info_t*)dlsym(PluginSOHandle, "GetFileInfo");
+        TempFunc->FillBuffer = (fill_t*)dlsym(PluginSOHandle, "FillBuffer");
+        TempFunc->OpenFile = (open_t*)dlsym(PluginSOHandle, "OpenFile");
+        TempFunc->Seek = (seek_t*)dlsym(PluginSOHandle, "Seek");
+        TempFunc->Initialise = (init_t*)dlsym(PluginSOHandle, "Initialise");
         TempFunc->PluginSOHandle = PluginSOHandle;
         
         if (TempFunc->Cleanup
@@ -67,6 +67,7 @@ void LoadPlugins(char* path)
         }
         else
         {
+          printf("Failed to load %s\n", FullPluginName);
           dlclose(PluginSOHandle);
           free(TempFunc);
         }

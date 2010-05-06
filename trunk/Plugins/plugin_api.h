@@ -55,14 +55,24 @@ typedef struct FileInfo
 } FileInfo_t;   
 
 /******************************************************************************/
+/* Plugin entry point function signatures.                                    */
+/******************************************************************************/
+typedef void (init_t)(char*** Extensions);
+typedef enum GET_FILE_INFO_RETURN (info_t)(const char* filename, FileInfo_t* fi);
+typedef enum FILL_BUFFER_RETURN (fill_t)(unsigned char* pBuf, size_t* length);
+typedef enum OPEN_FILE_RETURN   (open_t)(const char* filename, pa_sample_spec* ss);
+typedef enum SEEK_RETURN        (seek_t)(int* seconds);
+typedef void (clean_t)();
+
+/******************************************************************************/
 /* Plugin entry point functions:                                              */
 /******************************************************************************/
-void                      Initialise(char*** Extensions);
-enum GET_FILE_INFO_RETURN GetFileInfo(const char* filename, FileInfo_t* fi);
-enum FILL_BUFFER_RETURN   FillBuffer(unsigned char* pBuf, size_t* length);
-enum SEEK_RETURN          Seek(int* seconds);
-enum OPEN_FILE_RETURN     OpenFile(const char* filename, pa_sample_spec* ss);
-void                      Cleanup();
+init_t Initialise;
+info_t GetFileInfo;
+fill_t  FillBuffer;
+seek_t Seek;
+open_t OpenFile;
+clean_t Cleanup;
 
 #ifdef __cplusplus
 }
