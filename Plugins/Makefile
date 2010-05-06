@@ -2,8 +2,7 @@ CC = gcc
 CPP = g++
 CFLAGS = -g -Wall -pedantic -DDEBUG__
 CFLAGSPLUG = -fPIC
-PLUGINS = plug-libmad.so plug-libvorbisfile.so plug-wav.so
-
+PLUGINS = plug-libmad.so plug-libvorbisfile.so plug-wav.so plug-libflac.so
 
 all : $(PLUGINS)
 
@@ -27,3 +26,7 @@ plug-libvorbisfile.so : plug-libvorbisfile.c plug-libvorbisfile.h plugin_api.h
 plug-wav.so : plug-wav.c plug-wav.h plugin_api.h
 	$(CC) $(CFLAGS) $(CFLAGSPLUG) -c plug-wav.c
 	$(CC) -shared -o plug-wav.so plug-wav.o
+
+plug-libflac.so : plug-libflac.c plugin_api.h
+	$(CC) $(CFLAGS) $(CFLAGSPLUG) -c plug-libflac.c
+	$(CC) -shared -o plug-libflac.so plug-libflac.o -lFLAC

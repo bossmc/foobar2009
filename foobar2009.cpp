@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
     return -1;
   }
   
+  win->AddFile("/home/andy/Music/Vivaldi/The Four Seasons/Vivaldi - The Four Seasons - 01 - Spring - Allegro.flac");
+  
   pa_threaded_mainloop_start(PALoop);
   
   Fl::scheme("gtk+");

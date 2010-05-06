@@ -315,7 +315,7 @@ void PlaylistBrowser::AddFile(const char* filename)
   
   memset(FileEntry, '\0', sizeof(FileEntry));
   
-  Funcs = GetFuncs(filename + strlen(filename) - 3);
+  Funcs = GetFuncs(strrchr(filename, '.') + 1);
   
   if (!Funcs)
   {
