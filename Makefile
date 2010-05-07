@@ -6,11 +6,11 @@ OBJECTS = foobar2009.o pulsefuncs.o callbacks.o plug-loader.o MainWindow.o Playl
 LIBRARIES = -lpulse -lfltk
 
 all : foobar2009 utils
-	cd Plugins; make;
+	cd Plugins; $(MAKE);
 
 clean : 
 	-rm *.o foobar2009 swapend wavify
-	cd Plugins; make clean;
+	cd Plugins; $(MAKE) clean;
 
 foobar2009 : $(OBJECTS)
 	$(CC) -o foobar2009 $(OBJECTS) $(LIBRARIES)
